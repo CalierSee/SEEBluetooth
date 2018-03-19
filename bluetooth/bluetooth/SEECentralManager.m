@@ -98,7 +98,7 @@ static NSUInteger characteristicCount = 0;
         [self.complete setObject:complete forKey:cUUID.UUIDString];
     }
     CBCharacteristic * characteristic = [self see_characteristicUUID:cUUID withServiceUUID:sUUID];
-    if (characteristic) {
+    if (characteristic && characteristic.properties & CBCharacteristicPropertyNotify) {
         [self.connectPeripheral setNotifyValue:YES forCharacteristic:characteristic];
     }
 }
@@ -108,14 +108,16 @@ static NSUInteger characteristicCount = 0;
         [self.complete setObject:complete forKey:cUUID.UUIDString];
     }
     CBCharacteristic * characteristic = [self see_characteristicUUID:cUUID withServiceUUID:sUUID];
-    if (characteristic) {
+    if (characteristic && characteristic.properties & CBCharacteristicPropertyNotify) {
         [self.connectPeripheral setNotifyValue:NO forCharacteristic:characteristic];
     }
 }
 
 - (void)readCharacteristicUUID:(CBUUID *)cUUID withServiceUUID:(CBUUID *)sUUID {
     CBCharacteristic * characteristic = [self see_characteristicUUID:cUUID withServiceUUID:sUUID];
-    [self.connectPeripheral readValueForCharacteristic:characteristic];
+    if (characteristic && characteristic.properties & CBCharacteristicPropertyRead) {
+        [self.connectPeripheral readValueForCharacteristic:characteristic];
+    }
 }
 
 - (void)writeCharacteristicUUID:(CBUUID *)cUUID withServiceUUID:(CBUUID *)sUUID value:(nonnull NSData *)value complete:(nonnull completeBlock)complete {
@@ -123,7 +125,9 @@ static NSUInteger characteristicCount = 0;
         [self.complete setObject:complete forKey:cUUID.UUIDString];
     }
     CBCharacteristic * characteristic = [self see_characteristicUUID:cUUID withServiceUUID:sUUID];
-    [self.connectPeripheral writeValue:value forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
+    if (characteristic && characteristic.properties & CBCharacteristicPropertyWrite) {
+        [self.connectPeripheral writeValue:value forCharacteristic:characteristic type:CBCharacteristicWriteWithResponse];
+    }
 }
 
 #pragma mark private method
